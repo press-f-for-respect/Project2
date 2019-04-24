@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import nosence.pressfforrespect.project2.model.Post;
+import nosence.pressfforrespect.project2.utils.MembersListDialogFragment;
 import nosence.pressfforrespect.project2.utils.PostAdapter;
 
 public class MainActivity extends AppCompatActivity {
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private DividerItemDecoration horizontalDividerItemDecoration;
     private Toolbar mainToolbar;
     private int listState = 0;
+    private MembersListDialogFragment membersListDialogFragment = new MembersListDialogFragment();
 
 
     @Override
@@ -78,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return true;
             case R.id.members_list:
+                membersListDialogFragment.show(getFragmentManager(), "members");
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
