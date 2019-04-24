@@ -2,4 +2,6 @@
     <string name="app_name">Project2</string>
     <string name="title">Title</string>
     <string name="body">Body</string>
+    <string name="change_to_grid">change_to_grid</string>
+    <string name="members_list">members_list</string>
 </resources>
