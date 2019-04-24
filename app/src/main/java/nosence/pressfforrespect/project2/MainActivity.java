@@ -61,8 +61,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.addItemDecoration(verticalDividerItemDecoration);
         recyclerView.setAdapter(adapter);
-
-        getData();
+        getPosts();
     }
 
     @Override
@@ -93,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    private void getData() {
+    private void getPosts() {
         final Gson gson = new Gson();
         final ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Loading...");
