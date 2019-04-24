@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -34,12 +35,16 @@ public class CommentsActivity extends AppCompatActivity {
     private LinearLayoutManager linearLayoutManager;
     private List<Comment> comments;
     private DividerItemDecoration dividerItemDecoration;
+    private Toolbar commentsToolbar;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_comments);
+        commentsToolbar = findViewById(R.id.comments_toolbar);
+        commentsToolbar.setTitle("comments");
+        setSupportActionBar(commentsToolbar);
         Intent intent = getIntent();
         int postId = intent.getIntExtra(PostAdapter.PostViewHolder.POST_ID, 1);
         recyclerView = findViewById(R.id.comments_recycler_view);
@@ -56,7 +61,7 @@ public class CommentsActivity extends AppCompatActivity {
 
     }
 
-    private void getComments(int postId){
+    private void getComments(final int postId){
         final Gson gson = new Gson();
         final ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Loading...");
@@ -78,6 +83,7 @@ public class CommentsActivity extends AppCompatActivity {
                     progressDialog.dismiss();
                 }
                 adapter.notifyDataSetChanged();
+                commentsToolbar.setTitle("Post " + postId + ", " + comments.size() + " comments" );
                 progressDialog.dismiss();
             }
         }, new Response.ErrorListener() {
