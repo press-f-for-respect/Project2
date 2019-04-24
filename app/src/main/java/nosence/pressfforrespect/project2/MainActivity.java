@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private DividerItemDecoration verticalDividerItemDecoration;
     private DividerItemDecoration horizontalDividerItemDecoration;
     private Toolbar mainToolbar;
+    private int listState = 0;
 
 
     @Override
@@ -66,6 +67,15 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.change_to_grid:
+                if(listState == 0) {
+                    recyclerView.setLayoutManager(gridLayoutManager);
+                    recyclerView.addItemDecoration(horizontalDividerItemDecoration);
+                    listState = 1;
+                } else {
+                    recyclerView.setLayoutManager(linearLayoutManager);
+                    recyclerView.removeItemDecoration(horizontalDividerItemDecoration);
+                    listState = 0;
+                }
                 return true;
             case R.id.members_list:
                 return true;
