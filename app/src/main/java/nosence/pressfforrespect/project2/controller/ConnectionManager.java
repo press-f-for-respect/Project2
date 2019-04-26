@@ -59,6 +59,7 @@ public class ConnectionManager {
     }
 
     private void handlePosts(ArrayList<Post> posts, boolean succeed){
+        //TODO for kourosh kun to complete
         if(succeed)
             messageController.updatePosts(posts);
         else
