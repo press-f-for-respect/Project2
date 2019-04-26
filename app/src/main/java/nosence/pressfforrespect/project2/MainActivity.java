@@ -11,25 +11,19 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.Volley;
-import com.google.gson.Gson;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import nosence.pressfforrespect.project2.controller.MessageController;
+import nosence.pressfforrespect.project2.controller.NotificationCenter;
 import nosence.pressfforrespect.project2.model.Post;
 import nosence.pressfforrespect.project2.utils.MembersListDialogFragment;
 import nosence.pressfforrespect.project2.utils.PostAdapter;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NotificationCenter.Observer {
+
+    private NotificationCenter notificationCenter = NotificationCenter.getInstance();
+    private MessageController messageController;
 
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
@@ -41,12 +35,17 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar mainToolbar;
     private int listState = 0;
     private MembersListDialogFragment membersListDialogFragment = new MembersListDialogFragment();
+    private ProgressDialog progressDialog;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        notificationCenter.register(this);
+        messageController = MessageController.getInstance(notificationCenter, getApplicationContext(), savedInstanceState);
+
         mainToolbar = findViewById(R.id.main_toolbar);
         setSupportActionBar(mainToolbar);
         recyclerView = findViewById(R.id.posts_recycler_view);
@@ -93,35 +92,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getPosts() {
-        final Gson gson = new Gson();
-        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Loading...");
         progressDialog.show();
+        messageController.fetchPosts();
+    }
 
-        final RequestQueue requestQueue = Volley.newRequestQueue(this);
-        String url = "https://jsonplaceholder.typicode.com/posts";
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
-                Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                try {
-                    for (int i = 0; i < response.length(); i++) {
-                        Post post = gson.fromJson(response.get(i).toString(), Post.class);
-                        posts.add(post);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    progressDialog.dismiss();
-                }
-                adapter.notifyDataSetChanged();
-                progressDialog.dismiss();
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                progressDialog.dismiss();
-            }
-        });
-        requestQueue.add(jsonArrayRequest);
+    @Override
+    public void update(int state) {
+        if(state != 0)
+            return;
+        posts.clear();
+        posts.addAll(messageController.getListOfPosts());
+        adapter.notifyDataSetChanged();
+        progressDialog.dismiss();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        notificationCenter.unRegister(this);
     }
 }

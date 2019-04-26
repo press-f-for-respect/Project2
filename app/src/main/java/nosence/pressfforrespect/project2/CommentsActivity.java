@@ -23,12 +23,17 @@ import org.json.JSONException;
 import java.util.ArrayList;
 import java.util.List;
 
+import nosence.pressfforrespect.project2.controller.MessageController;
+import nosence.pressfforrespect.project2.controller.NotificationCenter;
 import nosence.pressfforrespect.project2.model.Comment;
 import nosence.pressfforrespect.project2.model.Post;
 import nosence.pressfforrespect.project2.utils.CommentAdapter;
 import nosence.pressfforrespect.project2.utils.PostAdapter;
 
-public class CommentsActivity extends AppCompatActivity {
+public class CommentsActivity extends AppCompatActivity implements NotificationCenter.Observer {
+
+    private NotificationCenter notificationCenter = NotificationCenter.getInstance();
+    private MessageController messageController;
 
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
@@ -36,17 +41,23 @@ public class CommentsActivity extends AppCompatActivity {
     private List<Comment> comments;
     private DividerItemDecoration dividerItemDecoration;
     private Toolbar commentsToolbar;
+    private ProgressDialog progressDialog;
+    private int postId;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_comments);
+
+        notificationCenter.register(this);
+        messageController = MessageController.getInstance();
+
         commentsToolbar = findViewById(R.id.comments_toolbar);
         commentsToolbar.setTitle("comments");
         setSupportActionBar(commentsToolbar);
         Intent intent = getIntent();
-        int postId = intent.getIntExtra(PostAdapter.PostViewHolder.POST_ID, 1);
+        postId = intent.getIntExtra(PostAdapter.PostViewHolder.POST_ID, 1);
         recyclerView = findViewById(R.id.comments_recycler_view);
         comments = new ArrayList<>();
         adapter = new CommentAdapter(getApplicationContext(), comments);
@@ -57,41 +68,31 @@ public class CommentsActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.addItemDecoration(dividerItemDecoration);
         recyclerView.setAdapter(adapter);
-        getComments(postId);
+        getComments();
 
     }
 
-    private void getComments(final int postId){
-        final Gson gson = new Gson();
-        final ProgressDialog progressDialog = new ProgressDialog(this);
+    private void getComments(){
+        progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Loading...");
         progressDialog.show();
+        messageController.fetchComments(getApplicationContext(), postId);
+    }
 
-        final RequestQueue requestQueue = Volley.newRequestQueue(this);
-        String url = "https://jsonplaceholder.typicode.com/comments?postId=" + postId;
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
-                Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                try {
-                    for (int i = 0; i < response.length(); i++) {
-                        Comment comment = gson.fromJson(response.get(i).toString(), Comment.class);
-                        comments.add(comment);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    progressDialog.dismiss();
-                }
-                adapter.notifyDataSetChanged();
-                commentsToolbar.setTitle("Post " + postId + ", " + comments.size() + " comments" );
-                progressDialog.dismiss();
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                progressDialog.dismiss();
-            }
-        });
-        requestQueue.add(jsonArrayRequest);
+    @Override
+    public void update(int state) {
+        if(state != 1)
+            return;
+        comments.clear();
+        comments.addAll(messageController.getListOfComments());
+        adapter.notifyDataSetChanged();
+        commentsToolbar.setTitle("Post " + postId + ", " + comments.size() + " comments" );
+        progressDialog.dismiss();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        notificationCenter.unRegister(this);
     }
 }
