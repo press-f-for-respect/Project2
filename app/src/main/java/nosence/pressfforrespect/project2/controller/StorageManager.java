@@ -49,11 +49,13 @@ public class StorageManager {
 
     public void loadPosts(){
         ArrayList<Post> posts = new ArrayList<>();
+        //TODO for kourosh kun to complete
         messageController.updatePosts(posts);
     }
 
     public void loadComments(){
         ArrayList<Comment> comments = new ArrayList<>();
+        //TODO for kourosh kun to complete
         messageController.updateComments(comments);
     }
 

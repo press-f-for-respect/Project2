@@ -98,6 +98,7 @@ public class ConnectionManager {
     }
 
     private void handleComments(ArrayList<Comment> comments, boolean succeed){
+        //TODO for kourosh kun to complete
         if(succeed)
             messageController.updateComments(comments);
         else
