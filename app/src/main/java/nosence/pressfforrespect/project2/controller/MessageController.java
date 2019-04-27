@@ -54,7 +54,7 @@ public class MessageController {
     public void fetchPosts() {
         Date now = Calendar.getInstance().getTime();
         if(lastPostTime != null && (now.getTime() - lastPostTime.getTime())/1000 < 300)
-            fromCache(true);
+            fromCache();
         else {
             cloud.postRunnable(new Runnable() {
                 @Override
@@ -70,7 +70,7 @@ public class MessageController {
         Date now = Calendar.getInstance().getTime();
         Date lastComment = lastCommentsTime.get(id);
         if (lastComment != null && (now.getTime() - lastComment.getTime()) / 1000 < 300)
-            fromCache(false);
+            fromCache(id);
         else {
             cloud.postRunnable(new Runnable() {
                 @Override
