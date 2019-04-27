@@ -1,6 +1,7 @@
 package nosence.pressfforrespect.project2.controller;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -21,10 +22,12 @@ import nosence.pressfforrespect.project2.model.Post;
 public class ConnectionManager {
     private Context context;
     private MessageController messageController;
+    private DBManager dbManager;
 
     public ConnectionManager(Context context, MessageController messageController){
         this.context = context;
         this.messageController = messageController;
+        this.dbManager = DBManager.getInstance();
     }
 
     public void loadPosts(){
@@ -59,14 +62,15 @@ public class ConnectionManager {
     }
 
     private void handlePosts(ArrayList<Post> posts, boolean succeed){
-        //TODO for kourosh kun to complete
-        if(succeed)
+        if(succeed) {
+            dbManager.savePosts(posts);
             messageController.updatePosts(posts);
+        }
         else
-            messageController.fromCache(true);
+            messageController.fromCache();
     }
 
-    public void loadComments(Context context, int postId){
+    public void loadComments(Context context, final int postId){
         final Gson gson = new Gson();
         final ArrayList<Comment> comments = new ArrayList<>();
         final RequestQueue requestQueue = Volley.newRequestQueue(context);
@@ -80,11 +84,11 @@ public class ConnectionManager {
                         Comment comment = gson.fromJson(response.get(i).toString(), Comment.class);
                         comments.add(comment);
                     }
-                    handleComments(comments, true);
+                    handleComments(comments, true, postId);
                 } catch (JSONException e) {
                     e.printStackTrace();
                     comments.clear();
-                    handleComments(comments, false);
+                    handleComments(comments, false, postId);
                 }
 
             }
@@ -92,17 +96,18 @@ public class ConnectionManager {
             @Override
             public void onErrorResponse(VolleyError error) {
                 comments.clear();
-                handleComments(comments, false);
+                handleComments(comments, false, postId);
             }
         });
         requestQueue.add(jsonArrayRequest);
     }
 
-    private void handleComments(ArrayList<Comment> comments, boolean succeed){
-        //TODO for kourosh kun to complete
-        if(succeed)
+    private void handleComments(ArrayList<Comment> comments, boolean succeed, int postid){
+        if(succeed) {
+            dbManager.saveComments(comments);
             messageController.updateComments(comments);
+        }
         else
-            messageController.fromCache(false);
+            messageController.fromCache(postid);
     }
 }

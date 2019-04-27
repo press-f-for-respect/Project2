@@ -1,6 +1,7 @@
 package nosence.pressfforrespect.project2.controller;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -20,11 +21,13 @@ public class StorageManager {
     private Context context;
     private String filename;
     private MessageController messageController;
+    private DBManager dbManager;
 
     public StorageManager(Context context, MessageController messageController){
         this.context = context;
         this.messageController = messageController;
         this.filename = context.getString(R.string.file_addr);
+        this.dbManager = DBManager.getInstance();
     }
 
     public int read(){
@@ -48,15 +51,11 @@ public class StorageManager {
 
 
     public void loadPosts(){
-        ArrayList<Post> posts = new ArrayList<>();
-        //TODO for kourosh kun to complete
-        messageController.updatePosts(posts);
+        messageController.updatePosts(dbManager.getPosts());
     }
 
-    public void loadComments(){
-        ArrayList<Comment> comments = new ArrayList<>();
-        //TODO for kourosh kun to complete
-        messageController.updateComments(comments);
+    public void loadComments(int postid){
+        messageController.updateComments(dbManager.getComments(postid));
     }
 
     public void save(int last){

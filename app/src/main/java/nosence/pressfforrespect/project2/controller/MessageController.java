@@ -1,6 +1,7 @@
 package nosence.pressfforrespect.project2.controller;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
 import java.util.ArrayList;
@@ -18,11 +19,11 @@ public class MessageController {
     private static MessageController messageController;
     private DispatchQueue cloud = new DispatchQueue("cloud");
     private DispatchQueue storage = new DispatchQueue("storage");
-    private Bundle bundle;
+    private DBManager dbManager;
 
-    public static MessageController getInstance(NotificationCenter notificationCenter, Context context, Bundle savedInstanceState){
+    public static MessageController getInstance(NotificationCenter notificationCenter, Context context, SQLiteDatabase db){
         if(messageController == null)
-            messageController = new MessageController(notificationCenter, context, savedInstanceState);
+            messageController = new MessageController(notificationCenter, context, db);
         return messageController;
 
     }
@@ -32,11 +33,11 @@ public class MessageController {
 
     }
 
-    public MessageController(NotificationCenter notificationCenter, Context context, Bundle savedInstanceState) {
+    public MessageController(NotificationCenter notificationCenter, Context context, SQLiteDatabase db) {
         this.notificationCenter = notificationCenter;
-        storageManager = new StorageManager(context, this);
-        connectionManager = new ConnectionManager(context, this);
-        this.bundle = savedInstanceState;
+        this.dbManager = DBManager.getInstance(db);
+        this.storageManager = new StorageManager(context, this);
+        this.connectionManager = new ConnectionManager(context, this);
     }
 
     public ArrayList<Post> getListOfPosts() {
@@ -73,20 +74,21 @@ public class MessageController {
         notificationCenter.dataLoaded(1);
     }
 
-    public void fromCache(boolean isPost){
-        if(isPost)
-            storage.postRunnable(new Runnable() {
+    public void fromCache(){
+        storage.postRunnable(new Runnable() {
                 @Override
                 public void run() {
                     storageManager.loadPosts();
                 }
             });
-        else
-            storage.postRunnable(new Runnable() {
-                @Override
-                public void run() {
-                    storageManager.loadComments();
-                }
-            });
+    }
+
+    public void fromCache(final int postid){
+        storage.postRunnable(new Runnable() {
+            @Override
+            public void run() {
+                storageManager.loadComments(postid);
+            }
+        });
     }
 }

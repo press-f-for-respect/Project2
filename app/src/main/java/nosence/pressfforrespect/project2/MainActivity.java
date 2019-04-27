@@ -1,6 +1,8 @@
 package nosence.pressfforrespect.project2;
 
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -36,15 +38,18 @@ public class MainActivity extends AppCompatActivity implements NotificationCente
     private int listState = 0;
     private MembersListDialogFragment membersListDialogFragment = new MembersListDialogFragment();
     private ProgressDialog progressDialog;
-
+    private SQLiteDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        db = openOrCreateDatabase("DataBase", Context.MODE_PRIVATE,null);
+
+
         notificationCenter.register(this);
-        messageController = MessageController.getInstance(notificationCenter, getApplicationContext(), savedInstanceState);
+        messageController = MessageController.getInstance(notificationCenter, getApplicationContext(), db);
 
         mainToolbar = findViewById(R.id.main_toolbar);
         setSupportActionBar(mainToolbar);
